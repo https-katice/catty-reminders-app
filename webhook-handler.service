@@ -1,0 +1,13 @@
+[Unit]
+Description=GitHub Webhook Handler
+After=network.target
+
+[Service]
+User=katrin
+WorkingDirectory=/home/katrin/webhook-server
+ExecStart=/home/katrin/webhook-server/.venv/bin/python3 /home/katrin/webhook-server/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
