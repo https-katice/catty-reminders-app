@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/frpc -c /etc/frp/frpc.toml
+ExecStart=/usr/bin/frpc -c /etc/frp/frpc.toml
 Restart=always
 RestartSec=5
 
