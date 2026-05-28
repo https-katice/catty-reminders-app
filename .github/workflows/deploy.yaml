@@ -1,5 +1,4 @@
 name: Deploy
-
 on:
   release:
     types: [published]
@@ -7,23 +6,35 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@v1
+      - uses: actions/checkout@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: course.prafdin.ru
-          port: 3148
           username: katrin
+          port: 3148
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u https-katice --password-stdin
+            bash -c '
+              set -e
+              cd /home/katrin/catty-reminders-app
+              OWNER=$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]")
+              
+              export DEPLOY_REF=${{ github.sha }}
+              export IMAGE=ghcr.io/$OWNER/catty-reminders-app:${{ github.sha }}
+              
+              export DB_CONTAINER_NAME=catty-db
+              export APP_CONTAINER_NAME=catty-app
+              export MARIADB_ROOT_PASSWORD=mypass
+              export MARIADB_USER=katrin
+              export MARIADB_PASSWORD=mypass
+              export MARIADB_DATABASE=catty_reminders
+              export HOST_DB_PORT=3306
+              export CONTEINER_DB_PORT=3306
+              export HOST_APP_PORT=8181
+              export CONTEINER_APP_PORT=8181
 
-            docker stop catty-container || true
-            docker rm catty-container || true
-
-            docker pull ghcr.io/https-katice/catty-reminders-app:${{ github.sha }}
-
-            docker run -d --name catty-container -p 8181:8181 \
-              -e DEPLOY_REF=${{ github.sha }} \
-              ghcr.io/https-katice/catty-reminders-app:${{ github.sha }}
+              echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+              docker compose up -d --pull always --remove-orphans --force-recreate 
+            '
