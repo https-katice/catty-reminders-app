@@ -17,8 +17,13 @@ jobs:
           username: katrin
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u https-katice --password-stdin
+
             docker stop catty-container || true
             docker rm catty-container || true
+
             docker pull ghcr.io/https-katice/catty-reminders-app:${{ github.sha }}
+
             docker run -d --name catty-container -p 8181:8181 \
+              -e DEPLOY_REF=${{ github.sha }} \
               ghcr.io/https-katice/catty-reminders-app:${{ github.sha }}
