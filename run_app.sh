@@ -9,9 +9,9 @@ git reset --hard "$SHA"
 
 /home/katrin/catty-reminders-app/.venv/bin/python -m pip install -r requirements.txt
 
-echo "DEPLOY_REF=$SHA" | sudo tee /etc/catty-app-env
+echo "DEPLOY_REF=$SHA" | sudo tee /home/katrin/catty-reminders-app/.env
 
-sudo systemctl restart catty-app
+sudo systemctl restart catty-reminders
 
 sleep 3
 if systemctl is-active --quiet catty-app; then
