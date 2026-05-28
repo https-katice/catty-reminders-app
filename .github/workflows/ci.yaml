@@ -2,44 +2,40 @@ name: CI
 
 on:
   push:
-    branches:
-      - lab2
-      - lab2_autotests*
   pull_request:
-    branches:
-      - lab2
-      - lab2_autotests*
 
 jobs:
-  pipeline:
+  run-tests:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Install Python environment
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install required packages
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install uvicorn pytest-playwright
-          playwright install --with-deps chromium
+          pip install -r requirements.txt pytest pytest-playwright
+          playwright install chromium
 
-      - name: Start app
+      - name: Start service
         run: |
-          nohup uvicorn app.main:app --host 127.0.0.1 --port 8181 &
-          sleep 5
+          uvicorn app.main:app --host 127.0.0.1 --port 8181 &
+          for attempt in {1..20}; do
+            curl -s http://127.0.0.1:8181 && break
+            sleep 1
+          done
 
-      - name: Run tests
+      - name: Run pytest suite
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: pytest --junitxml=test_result.xml || true
+        run: pytest -v --tb=short --junitxml=test_result.xml
 
-      - name: Upload test results
-        if: always()
+      - name: Archive test results
         uses: actions/upload-artifact@v4
         with:
           name: test_result
