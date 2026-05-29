@@ -326,11 +326,6 @@
       "app": "catty-reminders-app"
     },
     {
-<<<<<<< HEAD
-      "login": "https-katice",
-      "id": "krivonosova",
-      "app": "catty-reminders-app"
-=======
       "login": "freegotohell",
       "id": "svyatkovskaya",
       "app": "catty-reminders-app"
@@ -399,7 +394,6 @@
       "login": "Getsomelight",
       "id": "volyanyuk",
       "app": "catty-reminders-app"
->>>>>>> upstream/main
     }
   ]
 }
